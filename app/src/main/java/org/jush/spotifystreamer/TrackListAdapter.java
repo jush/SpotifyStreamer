@@ -12,12 +12,12 @@ import com.squareup.picasso.Picasso;
 import java.util.Collections;
 import java.util.List;
 
-import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.Image;
+import kaaes.spotify.webapi.android.models.Track;
 import timber.log.Timber;
 
-public class ArtistListAdapter extends BaseAdapter {
-    private List<Artist> data = Collections.emptyList();
+public class TrackListAdapter extends BaseAdapter {
+    private List<Track> data = Collections.emptyList();
 
     @Override
     public int getCount() {
@@ -25,7 +25,7 @@ public class ArtistListAdapter extends BaseAdapter {
     }
 
     @Override
-    public Artist getItem(int position) {
+    public Track getItem(int position) {
         return data.get(position);
     }
 
@@ -45,14 +45,14 @@ public class ArtistListAdapter extends BaseAdapter {
         View view;
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            view = inflater.inflate(R.layout.artist_row, parent, false);
-            view.setTag(new ArtistViewHolder(view));
+            view = inflater.inflate(R.layout.track_row, parent, false);
+            view.setTag(new TrackViewHolder(view));
         } else {
             view = convertView;
         }
-        ArtistViewHolder artistHolder = (ArtistViewHolder) view.getTag();
-        Artist artist = getItem(position);
-        List<Image> images = artist.images;
+        TrackViewHolder trackHolder = (TrackViewHolder) view.getTag();
+        Track track = getItem(position);
+        List<Image> images = track.album.images;
         String thumbnailUrl = null;
         if (!images.isEmpty()) {
             Image thumbnailImg = null;
@@ -72,26 +72,29 @@ public class ArtistListAdapter extends BaseAdapter {
         }
         Picasso.with(view.getContext())
                 .load(thumbnailUrl)
-                .placeholder(R.drawable.ic_artist)
+                .placeholder(R.drawable.ic_track)
                 .centerCrop()
-                .resizeDimen(R.dimen.artist_thumbnail, R.dimen.artist_thumbnail)
-                .into(artistHolder.artistImg);
-        artistHolder.artistName.setText(artist.name);
+                .resizeDimen(R.dimen.track_thumbnail, R.dimen.track_thumbnail)
+                .into(trackHolder.trackImg);
+        trackHolder.trackName.setText(track.name);
+        trackHolder.trackAlbum.setText(track.album.name);
         return view;
     }
 
-    public void swapData(List<Artist> artists) {
-        data = artists;
+    public void swapData(List<Track> tracks) {
+        data = tracks;
         notifyDataSetChanged();
     }
 
-    private static class ArtistViewHolder {
-        final ImageView artistImg;
-        final TextView artistName;
+    private static class TrackViewHolder {
+        final ImageView trackImg;
+        final TextView trackName;
+        final TextView trackAlbum;
 
-        public ArtistViewHolder(View view) {
-            artistImg = (ImageView) view.findViewById(R.id.artist_image);
-            artistName = (TextView) view.findViewById(R.id.artist_name);
+        public TrackViewHolder(View view) {
+            trackImg = (ImageView) view.findViewById(R.id.track_image);
+            trackName = (TextView) view.findViewById(R.id.track_name);
+            trackAlbum = (TextView) view.findViewById(R.id.track_album);
         }
     }
 }

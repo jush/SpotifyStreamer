@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -27,7 +29,6 @@ import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
-    private SearchView searchView;
     private SpotifyApi spotifyApi;
     private ArtistListAdapter artistListAdapter;
     private ListView listView;
@@ -41,11 +42,20 @@ public class MainActivity extends AppCompatActivity {
         listView = (ListView) findViewById(R.id.result_list);
         artistListAdapter = new ArtistListAdapter();
         listView.setAdapter(artistListAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = ArtistTracksActivity.newStartIntent(MainActivity.this,
+                        artistListAdapter
+                                .getItem(position));
+                ActivityCompat.startActivity(MainActivity.this, intent, null);
+            }
+        });
 
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         // Assumes current activity is the searchable activity
-        searchView = (SearchView) findViewById(R.id.search);
+        SearchView searchView = (SearchView) findViewById(R.id.search);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
         spotifyApi = new SpotifyApi(Executors.newSingleThreadExecutor(), new MainThreadExecutor());
@@ -70,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     // Make sure the list is visible in case it was hidden due to no results found
                     listView.setVisibility(View.VISIBLE);
+                    // And hide any possible message
+                    messageView.setVisibility(View.GONE);
                     List<Artist> artists = artistsPager.artists.items;
                     artistListAdapter.swapData(artists);
                 }
