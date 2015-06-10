@@ -16,6 +16,16 @@
         android:iconifiedByDefault="false"
         android:searchHintIcon="@android:drawable/ic_menu_search"/>
 
+    <TextView
+        android:id="@+id/message"
+        style="@style/TextAppearance.AppCompat.Large"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:visibility="gone"
+        tools:text="No results found"/>
+
     <ListView
         android:id="@+id/result_list"
         android:layout_width="match_parent"

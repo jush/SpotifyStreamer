@@ -4,9 +4,12 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -27,12 +30,15 @@ public class MainActivity extends AppCompatActivity {
     private SearchView searchView;
     private SpotifyApi spotifyApi;
     private ArtistListAdapter artistListAdapter;
+    private ListView listView;
+    private TextView messageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ListView listView = (ListView) findViewById(R.id.result_list);
+        messageView = (TextView) findViewById(R.id.message);
+        listView = (ListView) findViewById(R.id.result_list);
         artistListAdapter = new ArtistListAdapter();
         listView.setAdapter(artistListAdapter);
 
@@ -57,24 +63,42 @@ public class MainActivity extends AppCompatActivity {
         service.searchArtists(query, new SpotifyCallback<ArtistsPager>() {
             @Override
             public void success(ArtistsPager artistsPager, Response response) {
-                List<Artist> artists = artistsPager.artists.items;
-                artistListAdapter.swapData(artists);
-                for (int i = 0; i < artists.size(); i++) {
-                    Artist artist = artists.get(i);
-                    Timber.d("Found artist '%s'", artist.name);
+                if (artistsPager == null || artistsPager.artists == null || artistsPager.artists
+                        .items == null || artistsPager.artists.items
+                        .isEmpty()) {
+                    showNoResultsFound();
+                } else {
+                    // Make sure the list is visible in case it was hidden due to no results found
+                    listView.setVisibility(View.VISIBLE);
+                    List<Artist> artists = artistsPager.artists.items;
+                    artistListAdapter.swapData(artists);
                 }
             }
 
             @Override
             public void failure(SpotifyError spotifyError) {
-
+                showErrorMessage();
             }
 
             @Override
             public void failure(RetrofitError error) {
-
+                showErrorMessage();
             }
         });
+    }
+
+    private void showErrorMessage() {
+        showMessage(R.string.query_error);
+    }
+
+    private void showNoResultsFound() {
+        showMessage(R.string.no_artists_found);
+    }
+
+    private void showMessage(@StringRes int messageId) {
+        messageView.setVisibility(View.VISIBLE);
+        listView.setVisibility(View.GONE);
+        messageView.setText(messageId);
     }
 
     @Override
