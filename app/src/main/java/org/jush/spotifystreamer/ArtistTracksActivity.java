@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -35,9 +34,10 @@ public class ArtistTracksActivity extends AppCompatActivity {
     private TrackListAdapter trackListAdapter;
     private TextView messageView;
 
-    public static Intent newStartIntent(Context context, Artist artist) {
-        return new Intent(context, ArtistTracksActivity.class).putExtra(ARTIST_ID_ARG, artist.id)
-                .putExtra(ARTIST_NAME_ARG, artist.name);
+    public static Intent newStartIntent(Context context, ParcelableArtist artist) {
+        return new Intent(context, ArtistTracksActivity.class).putExtra(ARTIST_ID_ARG, artist
+                .getId())
+                .putExtra(ARTIST_NAME_ARG, artist.getName());
     }
 
     @Override

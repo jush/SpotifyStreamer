@@ -129,4 +129,12 @@ public class MainActivity extends AppCompatActivity {
             super.onNewIntent(intent);
         }
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Ask the adapter to store its contents
+        artistListAdapter.onSaveInstanceState(outState);
+    }
+
 }

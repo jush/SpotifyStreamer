@@ -1,5 +1,6 @@
 package org.jush.spotifystreamer;
 
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,15 +10,14 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.Image;
-import timber.log.Timber;
 
 public class ArtistListAdapter extends BaseAdapter {
-    private List<Artist> data = Collections.emptyList();
+    private static final String DATA = "DATA";
+    private ArrayList<ParcelableArtist> data = new ArrayList<>(0);
 
     @Override
     public int getCount() {
@@ -25,13 +25,13 @@ public class ArtistListAdapter extends BaseAdapter {
     }
 
     @Override
-    public Artist getItem(int position) {
+    public ParcelableArtist getItem(int position) {
         return data.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return getItem(position).id.hashCode();
+        return getItem(position).getId().hashCode();
     }
 
     @Override
@@ -51,38 +51,28 @@ public class ArtistListAdapter extends BaseAdapter {
             view = convertView;
         }
         ArtistViewHolder artistHolder = (ArtistViewHolder) view.getTag();
-        Artist artist = getItem(position);
-        List<Image> images = artist.images;
-        String thumbnailUrl = null;
-        if (!images.isEmpty()) {
-            Image thumbnailImg = null;
-            for (Image image : images) {
-                if (image.height < 500 && image.height >= 200 && image.width < 500 && image.width
-                        >= 200) {
-                    thumbnailImg = image;
-                    break;
-                }
-            }
-            if (thumbnailImg == null) {
-                Timber.w("No suitable thumbnail image found. Using first one.");
-                // If no suitable size if found use the first one
-                thumbnailImg = images.get(0);
-            }
-            thumbnailUrl = thumbnailImg.url;
-        }
+        ParcelableArtist artist = getItem(position);
+        String thumbnailUrl = artist.getThumbnailUrl();
         Picasso.with(view.getContext())
                 .load(thumbnailUrl)
                 .placeholder(R.drawable.ic_artist)
                 .centerCrop()
                 .resizeDimen(R.dimen.artist_thumbnail, R.dimen.artist_thumbnail)
                 .into(artistHolder.artistImg);
-        artistHolder.artistName.setText(artist.name);
+        artistHolder.artistName.setText(artist.getName());
         return view;
     }
 
     public void swapData(List<Artist> artists) {
-        data = artists;
+        data = new ArrayList<>(artists.size());
+        for (Artist artist : artists) {
+            data.add(ParcelableArtist.create(artist));
+        }
         notifyDataSetChanged();
+    }
+
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(DATA, data);
     }
 
     private static class ArtistViewHolder {
@@ -94,4 +84,5 @@ public class ArtistListAdapter extends BaseAdapter {
             artistName = (TextView) view.findViewById(R.id.artist_name);
         }
     }
+
 }
