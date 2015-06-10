@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         messageView = (TextView) findViewById(R.id.message);
         listView = (ListView) findViewById(R.id.result_list);
-        artistListAdapter = new ArtistListAdapter();
+        artistListAdapter = new ArtistListAdapter(savedInstanceState);
         listView.setAdapter(artistListAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
         spotifyApi = new SpotifyApi(Executors.newSingleThreadExecutor(), new MainThreadExecutor());
+
         // Get the intent, verify the action and get the query
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {

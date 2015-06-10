@@ -1,6 +1,7 @@
 package org.jush.spotifystreamer;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,15 @@ import kaaes.spotify.webapi.android.models.Artist;
 
 public class ArtistListAdapter extends BaseAdapter {
     private static final String DATA = "DATA";
-    private ArrayList<ParcelableArtist> data = new ArrayList<>(0);
+    private ArrayList<ParcelableArtist> data;
+
+    public ArtistListAdapter(@Nullable Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            data = savedInstanceState.getParcelableArrayList(DATA);
+        } else {
+            data = new ArrayList<>(0);
+        }
+    }
 
     @Override
     public int getCount() {
