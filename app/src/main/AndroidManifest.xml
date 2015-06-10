@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.jush.spotifystreamer" >
+          xmlns:tools="http://schemas.android.com/tools"
+          package="org.jush.spotifystreamer" >
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -30,7 +31,8 @@
         <activity
             android:name=".ArtistTracksActivity"
             android:label="@string/title_activity_artist_tracks"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName=".MainActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.jush.spotifystreamer.MainActivity" />
