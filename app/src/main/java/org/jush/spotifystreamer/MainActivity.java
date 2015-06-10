@@ -13,7 +13,9 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -28,6 +30,11 @@ import retrofit.client.Response;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
+    private static final Map<String, Object> ARTIST_QUERY_PARAMS = new HashMap<>();
+
+    static {
+        ARTIST_QUERY_PARAMS.put("market", "FI");
+    }
 
     private SpotifyApi spotifyApi;
     private ArtistListAdapter artistListAdapter;
@@ -70,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     private void doMySearch(String query) {
         Timber.d("Performing '%s' query", query);
         SpotifyService service = spotifyApi.getService();
-        service.searchArtists(query, new SpotifyCallback<ArtistsPager>() {
+        service.searchArtists(query, ARTIST_QUERY_PARAMS, new SpotifyCallback<ArtistsPager>() {
             @Override
             public void success(ArtistsPager artistsPager, Response response) {
                 if (artistsPager == null || artistsPager.artists == null || artistsPager.artists
