@@ -17,11 +17,16 @@ import java.util.List;
 import kaaes.spotify.webapi.android.models.Artist;
 
 public class ArtistListAdapter extends BaseAdapter {
-    private static final String DATA = "DATA";
+    private static final String DATA = "org.jush.spotifystreamer.ArtistListAdapter.DATA";
     private ArrayList<ParcelableArtist> data;
 
+    /**
+     * Creates a new adapter able to display information about artists.
+     *
+     * @param savedInstanceState If not null then it will be used to initialize the list of artists.
+     */
     public ArtistListAdapter(@Nullable Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null && savedInstanceState.containsKey(DATA)) {
             data = savedInstanceState.getParcelableArrayList(DATA);
         } else {
             data = new ArrayList<>(0);
@@ -80,6 +85,11 @@ public class ArtistListAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    /**
+     * Convenient method to store the current list of artists in this adapter.
+     *
+     * @param outState
+     */
     public void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList(DATA, data);
     }
