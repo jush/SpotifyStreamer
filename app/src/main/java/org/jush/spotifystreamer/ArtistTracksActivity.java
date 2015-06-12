@@ -20,9 +20,10 @@ import retrofit.android.MainThreadExecutor;
 import retrofit.client.Response;
 
 public class ArtistTracksActivity extends AppCompatActivity {
-
     private static final String ARTIST_ID_ARG = "ARTIST_ID_ARG";
     private static final String ARTIST_NAME_ARG = "ARTIST_NAME_ARG";
+    private static final String LIST_VISIBLE = "LIST_VISIBLE";
+    private static final String MESSAGE_TEXT = "MESSAGE_TEXT";
 
     private static final Map<String, Object> TOP_TRACK_QUERY_PARAMS = new HashMap<>();
 
@@ -38,12 +39,6 @@ public class ArtistTracksActivity extends AppCompatActivity {
         return new Intent(context, ArtistTracksActivity.class).putExtra(ARTIST_ID_ARG, artist
                 .getId())
                 .putExtra(ARTIST_NAME_ARG, artist.getName());
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        trackListAdapter.onSaveInstanceState(outState);
     }
 
     @Override
@@ -65,11 +60,19 @@ public class ArtistTracksActivity extends AppCompatActivity {
         // Fetch the top tracks if it's the first time this activity is started
         if (savedInstanceState == null) {
             fetchTopTracks();
+        } else {
+            // Recover any possible messages we were showing
+            if (!savedInstanceState.getBoolean(LIST_VISIBLE, true)) {
+                listView.setVisibility(View.GONE);
+                messageView.setVisibility(View.VISIBLE);
+                messageView.setText(savedInstanceState.getCharSequence(MESSAGE_TEXT));
+            }
         }
     }
 
     private void fetchTopTracks() {
-        SpotifyApi spotifyApi = new SpotifyApi(Executors.newSingleThreadExecutor(), new MainThreadExecutor());
+        SpotifyApi spotifyApi = new SpotifyApi(Executors.newSingleThreadExecutor(), new
+                MainThreadExecutor());
         String artistId = getIntent().getStringExtra(ARTIST_ID_ARG);
         spotifyApi.getService()
                 .getArtistTopTrack(artistId, TOP_TRACK_QUERY_PARAMS, new Callback<Tracks>() {
@@ -97,5 +100,13 @@ public class ArtistTracksActivity extends AppCompatActivity {
         String artistName = getIntent().getStringExtra(ARTIST_NAME_ARG);
         messageView.setText(getString(R.string.no_tracks_found, artistName));
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        trackListAdapter.onSaveInstanceState(outState);
+        outState.putBoolean(LIST_VISIBLE, listView.getVisibility() == View.VISIBLE);
+        outState.putCharSequence(MESSAGE_TEXT, messageView.getText());
     }
 }

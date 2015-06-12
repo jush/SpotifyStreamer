@@ -30,6 +30,9 @@ import retrofit.client.Response;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String LIST_VISIBLE = "LIST_VISIBLE";
+    private static final String MESSAGE_TEXT = "MESSAGE_TEXT";
+
     private static final Map<String, Object> ARTIST_QUERY_PARAMS = new HashMap<>();
 
     static {
@@ -66,6 +69,15 @@ public class MainActivity extends AppCompatActivity {
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
         spotifyApi = new SpotifyApi(Executors.newSingleThreadExecutor(), new MainThreadExecutor());
+
+        if (savedInstanceState != null) {
+            // Recover any possible messages we were showing
+            if (!savedInstanceState.getBoolean(LIST_VISIBLE, true)) {
+                listView.setVisibility(View.GONE);
+                messageView.setVisibility(View.VISIBLE);
+                messageView.setText(savedInstanceState.getCharSequence(MESSAGE_TEXT));
+            }
+        }
 
         // Get the intent, verify the action and get the query
         Intent intent = getIntent();
@@ -136,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         // Ask the adapter to store its contents
         artistListAdapter.onSaveInstanceState(outState);
+        outState.putBoolean(LIST_VISIBLE, listView.getVisibility() == View.VISIBLE);
+        outState.putCharSequence(MESSAGE_TEXT, messageView.getText());
     }
-
 }
