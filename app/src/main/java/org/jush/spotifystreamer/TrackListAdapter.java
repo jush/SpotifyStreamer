@@ -1,5 +1,7 @@
 package org.jush.spotifystreamer;
 
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,15 +11,28 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
-import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
-import timber.log.Timber;
 
 public class TrackListAdapter extends BaseAdapter {
-    private List<Track> data = Collections.emptyList();
+    private static final String DATA = "org.jush.spotifystreamer.TrackListAdapter.DATA";
+    private ArrayList<ParcelableTrack> data;
+
+    /**
+     * Creates a new adapter able to display information about tracks.
+     *
+     * @param savedInstanceState If not null then it will be used to initialize the list of tracks.
+     */
+
+    public TrackListAdapter(@Nullable Bundle savedInstanceState) {
+        if (savedInstanceState != null && savedInstanceState.containsKey(DATA)) {
+            this.data = savedInstanceState.getParcelableArrayList(DATA);
+        } else {
+            this.data = new ArrayList<>(0);
+        }
+    }
 
     @Override
     public int getCount() {
@@ -25,13 +40,13 @@ public class TrackListAdapter extends BaseAdapter {
     }
 
     @Override
-    public Track getItem(int position) {
+    public ParcelableTrack getItem(int position) {
         return data.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return getItem(position).id.hashCode();
+        return getItem(position).getId().hashCode();
     }
 
     @Override
@@ -51,39 +66,35 @@ public class TrackListAdapter extends BaseAdapter {
             view = convertView;
         }
         TrackViewHolder trackHolder = (TrackViewHolder) view.getTag();
-        Track track = getItem(position);
-        List<Image> images = track.album.images;
-        String thumbnailUrl = null;
-        if (!images.isEmpty()) {
-            Image thumbnailImg = null;
-            for (Image image : images) {
-                if (image.height < 500 && image.height >= 200 && image.width < 500 && image.width
-                        >= 200) {
-                    thumbnailImg = image;
-                    break;
-                }
-            }
-            if (thumbnailImg == null) {
-                Timber.w("No suitable thumbnail image found. Using first one.");
-                // If no suitable size if found use the first one
-                thumbnailImg = images.get(0);
-            }
-            thumbnailUrl = thumbnailImg.url;
-        }
+        ParcelableTrack track = getItem(position);
+        String thumbnailUrl = track.getThumbnailUrl();
         Picasso.with(view.getContext())
                 .load(thumbnailUrl)
                 .placeholder(R.drawable.ic_track)
                 .centerCrop()
                 .resizeDimen(R.dimen.track_thumbnail, R.dimen.track_thumbnail)
                 .into(trackHolder.trackImg);
-        trackHolder.trackName.setText(track.name);
-        trackHolder.trackAlbum.setText(track.album.name);
+        trackHolder.trackName.setText(track.getName());
+        trackHolder.trackAlbum.setText(track.getAlbumName());
         return view;
     }
 
     public void swapData(List<Track> tracks) {
-        data = tracks;
+        // Transform the list of tracks to ParcelableTracks
+        data = new ArrayList<>(tracks.size());
+        for (Track track : tracks) {
+            data.add(ParcelableTrack.create(track));
+        }
         notifyDataSetChanged();
+    }
+
+    /**
+     * Convenient method to store the current list of artists in this adapter.
+     *
+     * @param outState
+     */
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(DATA, data);
     }
 
     private static class TrackViewHolder {

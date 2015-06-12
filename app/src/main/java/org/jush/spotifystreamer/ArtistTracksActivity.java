@@ -41,6 +41,12 @@ public class ArtistTracksActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        trackListAdapter.onSaveInstanceState(outState);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist_tracks);
@@ -53,11 +59,17 @@ public class ArtistTracksActivity extends AppCompatActivity {
 
         listView = (ListView) findViewById(R.id.tracks_list);
 
-        trackListAdapter = new TrackListAdapter();
+        trackListAdapter = new TrackListAdapter(savedInstanceState);
         listView.setAdapter(trackListAdapter);
 
-        SpotifyApi spotifyApi = new SpotifyApi(Executors.newSingleThreadExecutor(), new
-                MainThreadExecutor());
+        // Fetch the top tracks if it's the first time this activity is started
+        if (savedInstanceState == null) {
+            fetchTopTracks();
+        }
+    }
+
+    private void fetchTopTracks() {
+        SpotifyApi spotifyApi = new SpotifyApi(Executors.newSingleThreadExecutor(), new MainThreadExecutor());
         String artistId = getIntent().getStringExtra(ARTIST_ID_ARG);
         spotifyApi.getService()
                 .getArtistTopTrack(artistId, TOP_TRACK_QUERY_PARAMS, new Callback<Tracks>() {
